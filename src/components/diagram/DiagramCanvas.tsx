@@ -17,13 +17,15 @@ import {
 import '@xyflow/react/dist/style.css';
 
 import { EntityNode } from './EntityNode';
+import { RelationshipNode } from './RelationshipNode';
 import { createDemoSchema } from '@/lib/demo';
 import { useSchemaStore } from '@/lib/store';
-import { Plus, Download, RotateCcw, FileJson, Sparkles } from 'lucide-react';
+import { Plus, Diamond, FileJson, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const nodeTypes: NodeTypes = {
   entity: EntityNode,
+  relationship: RelationshipNode,
 };
 
 export const DiagramCanvas = () => {
@@ -31,20 +33,32 @@ export const DiagramCanvas = () => {
   const { 
     schema, 
     addEntity, 
-    addRelation, 
+    addRelation,
+    addRelationship,
     setEntityPosition,
+    setRelationshipPosition,
     selectEntity,
+    selectRelationship,
   } = useSchemaStore();
 
-  // Convert schema entities to React Flow nodes
+  // Convert schema entities and relationships to React Flow nodes
   const initialNodes: Node[] = useMemo(() => {
-    return schema.entities.map((entity) => ({
+    const entityNodes = schema.entities.map((entity) => ({
       id: entity.id,
       type: 'entity',
       position: entity.position,
       data: { entity },
     }));
-  }, [schema.entities]);
+
+    const relationshipNodes = (schema.relationships || []).map((relationship) => ({
+      id: relationship.id,
+      type: 'relationship',
+      position: relationship.position,
+      data: { relationship },
+    }));
+
+    return [...entityNodes, ...relationshipNodes];
+  }, [schema.entities, schema.relationships]);
 
   // Convert schema relations to React Flow edges
   const initialEdges: Edge[] = useMemo(() => {
@@ -112,9 +126,13 @@ export const DiagramCanvas = () => {
 
   const onNodeDragStop = useCallback(
     (_: React.MouseEvent, node: Node) => {
-      setEntityPosition(node.id, node.position);
+      if (node.type === 'relationship') {
+        setRelationshipPosition(node.id, node.position);
+      } else {
+        setEntityPosition(node.id, node.position);
+      }
     },
-    [setEntityPosition]
+    [setEntityPosition, setRelationshipPosition]
   );
 
   const handleAddEntity = () => {
@@ -125,8 +143,17 @@ export const DiagramCanvas = () => {
     });
   };
 
+  const handleAddRelationship = () => {
+    const offset = (schema.relationships?.length || 0) * 50;
+    addRelationship(`Relationship${(schema.relationships?.length || 0) + 1}`, { 
+      x: 300 + offset, 
+      y: 250 + offset 
+    });
+  };
+
   const handlePaneClick = () => {
     selectEntity(null);
+    selectRelationship(null);
   };
 
   return (
@@ -168,6 +195,15 @@ export const DiagramCanvas = () => {
           >
             <Plus className="w-4 h-4" />
             Add Entity
+          </Button>
+          <Button
+            onClick={handleAddRelationship}
+            size="sm"
+            variant="secondary"
+            className="gap-2 shadow-lg"
+          >
+            <Diamond className="w-4 h-4" />
+            Add Relationship
           </Button>
         </Panel>
 
