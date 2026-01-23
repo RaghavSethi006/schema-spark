@@ -1,12 +1,12 @@
 import { AppLayout } from '@/components/layout/AppLayout';
 import { DiagramCanvas } from '@/components/diagram/DiagramCanvas';
-import { EntityEditor } from '@/components/sidebar/EntityEditor';
+import { SidebarManager } from '@/components/sidebar/SidebarManager';
 import { ReactFlowProvider } from '@xyflow/react';
 
 const Index = () => {
   return (
     <ReactFlowProvider>
-      <AppLayout sidebar={<EntityEditor />}>
+      <AppLayout sidebar={<SidebarManager />}>
         <DiagramCanvas />
       </AppLayout>
     </ReactFlowProvider>
