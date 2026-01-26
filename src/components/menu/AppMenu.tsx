@@ -291,9 +291,16 @@ export const AppMenu = ({ onToggleSidebar, isSidebarCollapsed }: AppMenuProps) =
             <MenubarSub>
               <MenubarSubTrigger disabled={!currentProject}>Export</MenubarSubTrigger>
               <MenubarSubContent>
-                <MenubarItem onClick={handleExportSQL}>
-                  Python/FastAPI (.zip)
+                <MenubarItem onClick={() => {
+                  // Trigger the export dialog by clicking the export button
+                  const exportButton = document.querySelector('[data-export-trigger]');
+                  if (exportButton) {
+                    (exportButton as HTMLElement).click();
+                  }
+                }}>
+                  Export Backend Project...
                 </MenubarItem>
+                <MenubarSeparator />
                 <MenubarItem onClick={handleExportJSON}>
                   JSON Schema (.json)
                 </MenubarItem>

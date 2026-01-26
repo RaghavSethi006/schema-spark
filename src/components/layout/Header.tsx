@@ -5,7 +5,6 @@ import {
   X, 
   RotateCcw, 
   FileJson,
-  Home,
   Circle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -26,11 +25,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { ExportDialog } from '@/components/export/ExportDialog';
+import { AdvancedExportDialog } from '@/components/export/AdvancedExportDialog';
 import { AppMenu } from '@/components/menu/AppMenu';
 import { useSchemaStore } from '@/lib/store';
 import { useProjectStore } from '@/lib/projectStore';
-import { cn } from '@/lib/utils';
 
 interface HeaderProps {
   isSidebarOpen: boolean;
@@ -129,7 +127,7 @@ export const Header = ({ isSidebarOpen, onToggleSidebar }: HeaderProps) => {
         </AlertDialog>
 
         {/* Export Button */}
-        <ExportDialog />
+        <AdvancedExportDialog />
 
         {/* Sidebar Toggle (Mobile) */}
         <Button
