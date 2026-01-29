@@ -1,0 +1,102 @@
+Schema Spark Protective Open Source License (SS-POL v1.0)
+
+Copyright (c) 2026 Raghav Sethi.
+All rights reserved.
+
+This license governs the use, modification, and distribution of the
+Schema Spark software and associated documentation (the "Software").
+
+------------------------------------------------------------
+
+1. Ownership
+
+The Software is the exclusive intellectual property of Raghav Sethi.
+This license does not transfer ownership. All rights not explicitly
+granted are reserved.
+
+------------------------------------------------------------
+
+2. Permitted Use
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of the Software to use, study, and modify it strictly for:
+
+- Personal use
+- Educational purposes
+- Academic research
+- Non-commercial internal projects
+- Open-source contribution to this repository
+
+------------------------------------------------------------
+
+3. Restrictions
+
+Without prior written permission from the copyright holder, you may NOT:
+
+- Sell, license, sublicense, rent, lease, or monetize the Software.
+- Offer the Software as a hosted service (SaaS, API, PaaS, or platform).
+- Use the Software or derivatives in commercial products or services.
+- Rebrand, rename, or redistribute the Software under a different identity.
+- Remove or alter copyright notices.
+- Create closed-source forks or proprietary derivatives.
+- Use the Software to build a competing or functionally equivalent platform.
+
+------------------------------------------------------------
+
+4. Redistribution
+
+Redistribution of the Software, modified or unmodified, is permitted only if:
+
+- The Software remains fully open-source.
+- This license is included in full.
+- Clear attribution is provided:
+  
+  "Schema Spark — Created by Raghav Sethi"
+
+------------------------------------------------------------
+
+5. Contributions
+
+By submitting a contribution, you grant Raghav Sethi a perpetual,
+worldwide, royalty-free, irrevocable right to use, modify, relicense,
+and distribute your contribution as part of the Software.
+
+------------------------------------------------------------
+
+6. Trademark & Brand Protection
+
+This license does not grant rights to use the names "Schema Spark",
+"ERForge", associated logos, branding, UI designs, or visual identity.
+
+------------------------------------------------------------
+
+7. Termination
+
+Any violation of this license automatically terminates all rights
+granted under it.
+
+------------------------------------------------------------
+
+8. Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+
+------------------------------------------------------------
+
+9. Limitation of Liability
+
+IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+LIABILITY ARISING FROM THE SOFTWARE OR ITS USE.
+
+------------------------------------------------------------
+
+10. Commercial Licensing
+
+Commercial licenses are available for enterprise, SaaS, and business use.
+
+For licensing inquiries, contact:
+Sethi.Raghav006@gmail.com [EMAIL_ADDRESS]
+
+------------------------------------------------------------
