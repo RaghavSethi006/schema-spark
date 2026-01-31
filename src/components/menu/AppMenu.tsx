@@ -22,8 +22,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { 
-  useProjectStore, 
+import {
+  useProjectStore,
   exportProjectFile,
   importProjectFile,
 } from '@/lib/projectStore';
@@ -39,8 +39,8 @@ interface AppMenuProps {
 export const AppMenu = ({ onToggleSidebar, isSidebarCollapsed }: AppMenuProps) => {
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
-  
-  const { 
+
+  const {
     currentProject,
     hasUnsavedChanges,
     recentProjects,
@@ -53,7 +53,7 @@ export const AppMenu = ({ onToggleSidebar, isSidebarCollapsed }: AppMenuProps) =
     autosaveEnabled,
     setAutosaveEnabled,
   } = useProjectStore();
-  
+
   const { schema, setSchema, resetSchema } = useSchemaStore();
 
   // Handle unsaved changes confirmation
@@ -77,7 +77,7 @@ export const AppMenu = ({ onToggleSidebar, isSidebarCollapsed }: AppMenuProps) =
   const handleOpen = () => {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.erforge,.json';
+    input.accept = '.schemaspark,.json';
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (file) {
@@ -98,7 +98,7 @@ export const AppMenu = ({ onToggleSidebar, isSidebarCollapsed }: AppMenuProps) =
 
   const handleOpenRecent = (projectId: string) => {
     confirmAction(() => {
-      const autosaveData = localStorage.getItem(`erforge-autosave-${projectId}`);
+      const autosaveData = localStorage.getItem(`schemaspark-autosave-${projectId}`);
       if (autosaveData) {
         try {
           const project = JSON.parse(autosaveData);
@@ -113,12 +113,12 @@ export const AppMenu = ({ onToggleSidebar, isSidebarCollapsed }: AppMenuProps) =
 
   const handleSave = () => {
     if (!currentProject) return;
-    
+
     // Update project with current schema
     currentProject.schema = schema;
     const saved = saveProject();
     if (saved) {
-      localStorage.setItem(`erforge-autosave-${saved.id}`, JSON.stringify(saved));
+      localStorage.setItem(`schemaspark-autosave-${saved.id}`, JSON.stringify(saved));
       toast.success('Project saved');
     }
   };
@@ -207,14 +207,14 @@ export const AppMenu = ({ onToggleSidebar, isSidebarCollapsed }: AppMenuProps) =
   };
 
   const handleAbout = () => {
-    toast.info('ERForge v1.0 - Visual Entity-Relationship Diagram Tool');
+    toast.info('Schema Spark v1.0 - Visual Entity-Relationship Diagram Tool');
   };
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const isMod = e.ctrlKey || e.metaKey;
-      
+
       if (isMod && e.key === 's') {
         e.preventDefault();
         handleSave();
@@ -258,13 +258,13 @@ export const AppMenu = ({ onToggleSidebar, isSidebarCollapsed }: AppMenuProps) =
               Open...
               <MenubarShortcut>⌘O</MenubarShortcut>
             </MenubarItem>
-            
+
             {recentProjects.length > 0 && (
               <MenubarSub>
                 <MenubarSubTrigger>Open Recent</MenubarSubTrigger>
                 <MenubarSubContent>
                   {recentProjects.slice(0, 5).map((project) => (
-                    <MenubarItem 
+                    <MenubarItem
                       key={project.id}
                       onClick={() => handleOpenRecent(project.id)}
                     >
@@ -274,9 +274,9 @@ export const AppMenu = ({ onToggleSidebar, isSidebarCollapsed }: AppMenuProps) =
                 </MenubarSubContent>
               </MenubarSub>
             )}
-            
+
             <MenubarSeparator />
-            
+
             <MenubarItem onClick={handleSave} disabled={!currentProject}>
               Save
               <MenubarShortcut>⌘S</MenubarShortcut>
@@ -285,9 +285,9 @@ export const AppMenu = ({ onToggleSidebar, isSidebarCollapsed }: AppMenuProps) =
               Save As...
               <MenubarShortcut>⇧⌘S</MenubarShortcut>
             </MenubarItem>
-            
+
             <MenubarSeparator />
-            
+
             <MenubarSub>
               <MenubarSubTrigger disabled={!currentProject}>Export</MenubarSubTrigger>
               <MenubarSubContent>
@@ -306,9 +306,9 @@ export const AppMenu = ({ onToggleSidebar, isSidebarCollapsed }: AppMenuProps) =
                 </MenubarItem>
               </MenubarSubContent>
             </MenubarSub>
-            
+
             <MenubarSeparator />
-            
+
             <MenubarItem onClick={handleClose} disabled={!currentProject}>
               Close Project
             </MenubarItem>
@@ -331,7 +331,7 @@ export const AppMenu = ({ onToggleSidebar, isSidebarCollapsed }: AppMenuProps) =
               <MenubarShortcut>⇧⌘Z</MenubarShortcut>
             </MenubarItem>
             <MenubarSeparator />
-            <MenubarCheckboxItem 
+            <MenubarCheckboxItem
               checked={autosaveEnabled}
               onCheckedChange={setAutosaveEnabled}
             >
@@ -344,7 +344,7 @@ export const AppMenu = ({ onToggleSidebar, isSidebarCollapsed }: AppMenuProps) =
         <MenubarMenu>
           <MenubarTrigger className="text-xs font-normal px-2 py-1 cursor-pointer">View</MenubarTrigger>
           <MenubarContent>
-            <MenubarCheckboxItem 
+            <MenubarCheckboxItem
               checked={!isSidebarCollapsed}
               onCheckedChange={handleToggleSidebar}
             >
@@ -382,7 +382,7 @@ export const AppMenu = ({ onToggleSidebar, isSidebarCollapsed }: AppMenuProps) =
             </MenubarItem>
             <MenubarSeparator />
             <MenubarItem onClick={handleAbout}>
-              About ERForge
+              About Schema Spark
             </MenubarItem>
           </MenubarContent>
         </MenubarMenu>

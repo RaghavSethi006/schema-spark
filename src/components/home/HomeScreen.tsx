@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import { 
-  Plus, 
-  FileJson, 
-  Clock, 
-  Folder, 
-  Search, 
-  Grid, 
-  List, 
-  Star, 
-  Trash2, 
+import {
+  Plus,
+  FileJson,
+  Clock,
+  Folder,
+  Search,
+  Grid,
+  List,
+  Star,
+  Trash2,
   Upload,
   Database,
   ShoppingCart,
@@ -24,9 +24,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  useProjectStore, 
-  OFFICIAL_TEMPLATES, 
+import {
+  useProjectStore,
+  OFFICIAL_TEMPLATES,
   importProjectFile,
   ProjectTemplate,
 } from '@/lib/projectStore';
@@ -46,17 +46,17 @@ export const HomeScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [isDragOver, setIsDragOver] = useState(false);
-  
-  const { 
-    recentProjects, 
+
+  const {
+    recentProjects,
     userTemplates,
     createNewProject,
-    createFromTemplate, 
+    createFromTemplate,
     openProject,
     removeFromRecent,
     setHomeScreen,
   } = useProjectStore();
-  
+
   const { setSchema } = useSchemaStore();
 
   const handleCreateNewProject = () => {
@@ -82,9 +82,9 @@ export const HomeScreen = () => {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    
+
     const files = Array.from(e.dataTransfer.files);
-    const projectFile = files.find(f => f.name.endsWith('.erforge') || f.name.endsWith('.json'));
+    const projectFile = files.find(f => f.name.endsWith('.schemaspark') || f.name.endsWith('.json'));
     if (projectFile) {
       handleFileImport(projectFile);
     }
@@ -98,7 +98,7 @@ export const HomeScreen = () => {
   };
 
   const allTemplates = [...OFFICIAL_TEMPLATES, ...userTemplates];
-  const filteredTemplates = allTemplates.filter(t => 
+  const filteredTemplates = allTemplates.filter(t =>
     t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
     t.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -109,7 +109,7 @@ export const HomeScreen = () => {
   );
 
   return (
-    <div 
+    <div
       className={cn(
         "h-full flex flex-col bg-background",
         isDragOver && "ring-2 ring-primary ring-inset"
@@ -122,15 +122,13 @@ export const HomeScreen = () => {
       <div className="border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Database className="w-7 h-7 text-primary" />
-            </div>
+            <img src="/favicon.png" alt="Schema Spark Logo" className="w-12 h-12 object-contain" />
             <div>
-              <h1 className="text-2xl font-bold text-gradient">ERForge</h1>
+              <h1 className="text-2xl font-bold text-gradient">Schema Spark</h1>
               <p className="text-sm text-muted-foreground">Visual Entity-Relationship Diagram Tool</p>
             </div>
           </div>
-          
+
           {/* Search and View Toggle */}
           <div className="flex items-center gap-4">
             <div className="relative flex-1 max-w-md">
@@ -203,7 +201,7 @@ export const HomeScreen = () => {
                 <label className="group p-6 rounded-xl border border-border hover:border-primary/50 hover:bg-muted/30 transition-all cursor-pointer text-left">
                   <input
                     type="file"
-                    accept=".erforge,.json"
+                    accept=".schemaspark,.json"
                     onChange={handleFileInput}
                     className="sr-only"
                   />
@@ -211,15 +209,15 @@ export const HomeScreen = () => {
                     <FolderOpen className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
                   </div>
                   <h3 className="font-semibold mb-1">Open Project</h3>
-                  <p className="text-sm text-muted-foreground">Open an existing .erforge file</p>
+                  <p className="text-sm text-muted-foreground">Open an existing .schemaspark file</p>
                 </label>
 
                 {/* Drag & Drop */}
                 <div
                   className={cn(
                     "p-6 rounded-xl border-2 border-dashed transition-all text-left",
-                    isDragOver 
-                      ? "border-primary bg-primary/10" 
+                    isDragOver
+                      ? "border-primary bg-primary/10"
                       : "border-border"
                   )}
                 >
@@ -236,14 +234,14 @@ export const HomeScreen = () => {
                 <h2 className="text-lg font-semibold mb-4">Popular Templates</h2>
                 <div className={cn(
                   "gap-4",
-                  viewMode === 'grid' 
-                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" 
+                  viewMode === 'grid'
+                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
                     : "flex flex-col"
                 )}>
                   {OFFICIAL_TEMPLATES.slice(1).map((template) => (
-                    <TemplateCard 
-                      key={template.id} 
-                      template={template} 
+                    <TemplateCard
+                      key={template.id}
+                      template={template}
                       viewMode={viewMode}
                       onSelect={() => handleTemplateSelect(template)}
                     />
@@ -269,8 +267,8 @@ export const HomeScreen = () => {
               ) : (
                 <div className={cn(
                   "gap-4",
-                  viewMode === 'grid' 
-                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" 
+                  viewMode === 'grid'
+                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
                     : "flex flex-col"
                 )}>
                   {filteredRecent.map((project) => (
@@ -295,16 +293,16 @@ export const HomeScreen = () => {
                 </h2>
                 <div className={cn(
                   "gap-4",
-                  viewMode === 'grid' 
-                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" 
+                  viewMode === 'grid'
+                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
                     : "flex flex-col"
                 )}>
                   {filteredTemplates
                     .filter(t => t.category === 'official')
                     .map((template) => (
-                      <TemplateCard 
-                        key={template.id} 
-                        template={template} 
+                      <TemplateCard
+                        key={template.id}
+                        template={template}
                         viewMode={viewMode}
                         onSelect={() => handleTemplateSelect(template)}
                       />
@@ -321,16 +319,16 @@ export const HomeScreen = () => {
                   </h2>
                   <div className={cn(
                     "gap-4",
-                    viewMode === 'grid' 
-                      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" 
+                    viewMode === 'grid'
+                      ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
                       : "flex flex-col"
                   )}>
                     {filteredTemplates
                       .filter(t => t.category === 'user')
                       .map((template) => (
-                        <TemplateCard 
-                          key={template.id} 
-                          template={template} 
+                        <TemplateCard
+                          key={template.id}
+                          template={template}
                           viewMode={viewMode}
                           onSelect={() => handleTemplateSelect(template)}
                         />
@@ -347,17 +345,17 @@ export const HomeScreen = () => {
 };
 
 // Template Card Component
-const TemplateCard = ({ 
-  template, 
+const TemplateCard = ({
+  template,
   viewMode,
   onSelect,
-}: { 
+}: {
   template: ProjectTemplate;
   viewMode: 'grid' | 'list';
   onSelect: () => void;
 }) => {
   const icon = TEMPLATE_ICONS[template.id] || <FileJson className="w-6 h-6" />;
-  
+
   if (viewMode === 'list') {
     return (
       <button
@@ -420,7 +418,7 @@ const RecentProjectCard = ({
 
   const handleOpen = () => {
     // Try to load from autosave
-    const autosaveData = localStorage.getItem(`erforge-autosave-${project.id}`);
+    const autosaveData = localStorage.getItem(`schemaspark-autosave-${project.id}`);
     if (autosaveData) {
       try {
         const savedProject = JSON.parse(autosaveData);

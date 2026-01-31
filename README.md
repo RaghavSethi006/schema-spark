@@ -4,7 +4,7 @@
 
 ![Schema Spark Banner](public/og-image.png)
 
-Schema Spark (powered by the **ERForge** engine) is a sophisticated, web-native Entity-Relationship (ER) modeling platform designed for modern software architects and data engineers. Unlike traditional diagramming tools, Schema Spark treats relationships as first-class citizens, enabling the generation of production-ready, highly-optimized backend boilerplate code across multiple languages and frameworks.
+Schema Spark is a sophisticated, web-native Entity-Relationship (ER) modeling platform designed for modern software architects and data engineers. Unlike traditional diagramming tools, Schema Spark treats relationships as first-class citizens, enabling the generation of production-ready, highly-optimized backend boilerplate code across multiple languages and frameworks.
 
 ---
 
@@ -22,7 +22,7 @@ By automating the "Boilerplate Phase" of backend development, Schema Spark reduc
 -   **🚀 Multi-Framework Code Generation**: Export production-ready projects in **FastAPI (Python)**, **Django (Python)**, **NestJS (TypeScript)**, **Express (Node.js)**, and **Spring Boot (Java)**.
 -   **🗄️ Database Agnostic**: Supports **PostgreSQL**, **MySQL**, **SQLite**, **Oracle**, and **SQL Server**.
 -   **📝 Logic Engine**: Define `BEFORE_CREATE`, `AFTER_UPDATE`, etc., triggers directly on relationships via a structured DSL.
--   **💾 Persistence & Recovery**: Robust autosave system using `localStorage` and a proprietary `.erforge` file format for project portability.
+-   **💾 Persistence & Recovery**: Robust autosave system using `localStorage` and a proprietary `.schemaspark` file format for project portability.
 -   **🏗️ Industry Templates**: Jumpstart projects with pre-built models for Auth Systems, LMS, E-Commerce, and CRM.
 
 ---
@@ -38,7 +38,7 @@ Schema Spark follows a decoupled, modular architecture designed for extensibilit
     1.  **Frontend State** → **Canonical IR** (Intermediate Representation).
     2.  **Canonical IR** → **Framework Adapters**.
     3.  **Framework Adapters** + **Database Adapters** → **Source Code**.
--   **Storage**: Local-first approach with exportable JSON-based `.erforge` files.
+-   **Storage**: Local-first approach with exportable JSON-based `.schemaspark` files.
 
 ---
 
@@ -177,7 +177,7 @@ Schema Spark allows defining "Logic Rules" on relationships. These represent bus
 -   **DSL**: Rules can be exported as pseudo-code or implemented as service-layer validation in the generated framework.
 
 ### **Project Portability**
-Save your work by exporting a `.erforge` file. These files contain the full state of your diagram and can be shared with teammates for instant collaborative review.
+Save your work by exporting a `.schemaspark` file. These files contain the full state of your diagram and can be shared with teammates for instant collaborative review.
 
 ---
 

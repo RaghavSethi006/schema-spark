@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ERForge Design System - Dark Developer Tool Aesthetic */
+/* Schema Spark Design System - Dark Developer Tool Aesthetic */
 
 @layer base {
   :root {
@@ -42,7 +42,7 @@
 
     --radius: 0.5rem;
 
-    /* Custom ERForge tokens */
+    /* Custom Schema Spark tokens */
     --canvas-bg: 222 47% 4%;
     --canvas-grid: 222 47% 10%;
     --canvas-dot: 222 47% 18%;

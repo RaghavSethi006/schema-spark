@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { 
-  Database, 
-  Menu, 
-  X, 
-  RotateCcw, 
+import {
+  Database,
+  Menu,
+  X,
+  RotateCcw,
   FileJson,
   Circle,
 } from 'lucide-react';
@@ -46,15 +46,13 @@ export const Header = ({ isSidebarOpen, onToggleSidebar }: HeaderProps) => {
         {/* Logo */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <button 
+            <button
               onClick={() => setHomeScreen(true)}
               className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-muted transition-colors"
             >
-              <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Database className="w-4 h-4 text-primary" />
-              </div>
+              <img src="/favicon.png" alt="Schema Spark Logo" className="w-7 h-7 object-contain" />
               <span className="font-bold text-sm text-gradient hidden sm:inline">
-                ERForge
+                Schema Spark
               </span>
             </button>
           </TooltipTrigger>
@@ -63,8 +61,8 @@ export const Header = ({ isSidebarOpen, onToggleSidebar }: HeaderProps) => {
 
         {/* Desktop App Menu */}
         <div className="hidden md:block">
-          <AppMenu 
-            onToggleSidebar={onToggleSidebar} 
+          <AppMenu
+            onToggleSidebar={onToggleSidebar}
             isSidebarCollapsed={sidebarCollapsed}
           />
         </div>

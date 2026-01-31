@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { ERSchema, createEmptySchema } from './schema';
 import { v4 as uuid } from 'uuid';
 
-// Project file format (.erforge)
+// Project file format (.schemaspark)
 export interface ProjectFile {
   version: '1.0';
   id: string;
@@ -283,20 +283,20 @@ interface ProjectStore {
   currentProject: ProjectFile | null;
   hasUnsavedChanges: boolean;
   isHomeScreen: boolean;
-  
+
   // Recent projects (persisted)
   recentProjects: RecentProject[];
   userTemplates: ProjectTemplate[];
-  
+
   // UI state
   sidebarWidth: number;
   sidebarPosition: 'left' | 'right';
   sidebarCollapsed: boolean;
-  
+
   // Autosave
   lastAutosave: string | null;
   autosaveEnabled: boolean;
-  
+
   // Actions
   createNewProject: (name?: string) => void;
   createFromTemplate: (template: ProjectTemplate) => void;
@@ -304,22 +304,22 @@ interface ProjectStore {
   closeProject: () => void;
   saveProject: () => ProjectFile | null;
   markAsChanged: () => void;
-  
+
   // Recent projects
   addToRecent: (project: RecentProject) => void;
   removeFromRecent: (id: string) => void;
   clearRecentProjects: () => void;
-  
+
   // Templates
   saveAsTemplate: (name: string, description: string, tags: string[]) => void;
   deleteUserTemplate: (id: string) => void;
-  
+
   // UI actions
   setSidebarWidth: (width: number) => void;
   setSidebarPosition: (position: 'left' | 'right') => void;
   toggleSidebar: () => void;
   setHomeScreen: (show: boolean) => void;
-  
+
   // Autosave
   performAutosave: () => void;
   setAutosaveEnabled: (enabled: boolean) => void;
@@ -338,16 +338,16 @@ export const useProjectStore = create<ProjectStore>()(
       sidebarCollapsed: false,
       lastAutosave: null,
       autosaveEnabled: true,
-      
+
       createNewProject: (name = 'Untitled Project') => {
         const project = createProjectFile(name);
-        set({ 
-          currentProject: project, 
+        set({
+          currentProject: project,
           hasUnsavedChanges: false,
           isHomeScreen: false,
         });
       },
-      
+
       createFromTemplate: (template) => {
         const project = JSON.parse(JSON.stringify(template.projectData)) as ProjectFile;
         project.id = uuid();
@@ -356,17 +356,17 @@ export const useProjectStore = create<ProjectStore>()(
         project.metadata.lastOpenedAt = new Date().toISOString();
         project.metadata.isTemplate = false;
         project.metadata.isReadOnlyTemplate = false;
-        set({ 
-          currentProject: project, 
+        set({
+          currentProject: project,
           hasUnsavedChanges: false,
           isHomeScreen: false,
         });
       },
-      
+
       openProject: (project) => {
         project.metadata.lastOpenedAt = new Date().toISOString();
-        set({ 
-          currentProject: project, 
+        set({
+          currentProject: project,
           hasUnsavedChanges: false,
           isHomeScreen: false,
         });
@@ -376,51 +376,51 @@ export const useProjectStore = create<ProjectStore>()(
           lastOpenedAt: project.metadata.lastOpenedAt,
         });
       },
-      
+
       closeProject: () => {
-        set({ 
-          currentProject: null, 
+        set({
+          currentProject: null,
           hasUnsavedChanges: false,
           isHomeScreen: true,
         });
       },
-      
+
       saveProject: () => {
         const { currentProject } = get();
         if (!currentProject) return null;
-        
+
         currentProject.metadata.updatedAt = new Date().toISOString();
         set({ hasUnsavedChanges: false });
         return currentProject;
       },
-      
+
       markAsChanged: () => {
         set({ hasUnsavedChanges: true });
       },
-      
+
       addToRecent: (project) => {
         set((state) => {
           const filtered = state.recentProjects.filter(p => p.id !== project.id);
-          return { 
-            recentProjects: [project, ...filtered].slice(0, 10) 
+          return {
+            recentProjects: [project, ...filtered].slice(0, 10)
           };
         });
       },
-      
+
       removeFromRecent: (id) => {
         set((state) => ({
           recentProjects: state.recentProjects.filter(p => p.id !== id),
         }));
       },
-      
+
       clearRecentProjects: () => {
         set({ recentProjects: [] });
       },
-      
+
       saveAsTemplate: (name, description, tags) => {
         const { currentProject } = get();
         if (!currentProject) return;
-        
+
         const template: ProjectTemplate = {
           id: uuid(),
           name,
@@ -430,52 +430,52 @@ export const useProjectStore = create<ProjectStore>()(
           projectData: JSON.parse(JSON.stringify(currentProject)),
         };
         template.projectData.metadata.isTemplate = true;
-        
+
         set((state) => ({
           userTemplates: [...state.userTemplates, template],
         }));
       },
-      
+
       deleteUserTemplate: (id) => {
         set((state) => ({
           userTemplates: state.userTemplates.filter(t => t.id !== id),
         }));
       },
-      
+
       setSidebarWidth: (width) => {
         set({ sidebarWidth: width });
       },
-      
+
       setSidebarPosition: (position) => {
         set({ sidebarPosition: position });
       },
-      
+
       toggleSidebar: () => {
         set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed }));
       },
-      
+
       setHomeScreen: (show) => {
         set({ isHomeScreen: show });
       },
-      
+
       performAutosave: () => {
         const { currentProject, hasUnsavedChanges, autosaveEnabled } = get();
         if (!currentProject || !hasUnsavedChanges || !autosaveEnabled) return;
-        
+
         const saved = get().saveProject();
         if (saved) {
           set({ lastAutosave: new Date().toISOString() });
           // Store in localStorage
-          localStorage.setItem(`erforge-autosave-${saved.id}`, JSON.stringify(saved));
+          localStorage.setItem(`schemaspark-autosave-${saved.id}`, JSON.stringify(saved));
         }
       },
-      
+
       setAutosaveEnabled: (enabled) => {
         set({ autosaveEnabled: enabled });
       },
     }),
     {
-      name: 'erforge-project-store',
+      name: 'schemaspark-project-store',
       partialize: (state) => ({
         recentProjects: state.recentProjects,
         userTemplates: state.userTemplates,
@@ -493,7 +493,7 @@ export const exportProjectFile = (project: ProjectFile): void => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `${project.name.replace(/\s+/g, '-').toLowerCase()}.erforge`;
+  a.download = `${project.name.replace(/\s+/g, '-').toLowerCase()}.schemaspark`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -507,12 +507,12 @@ export const importProjectFile = (file: File): Promise<ProjectFile> => {
       try {
         const content = e.target?.result as string;
         const project = JSON.parse(content) as ProjectFile;
-        
+
         // Validate
         if (!project.version || !project.id || !project.schema) {
           throw new Error('Invalid project file format');
         }
-        
+
         resolve(project);
       } catch (error) {
         reject(new Error('Failed to parse project file'));

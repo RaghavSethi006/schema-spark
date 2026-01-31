@@ -1,7 +1,7 @@
-// ERForge Schema Types - Single Source of Truth
+// Schema Spark Schema Types - Single Source of Truth
 // This JSON schema is used by the UI and all code generators
 
-export type FieldType = 
+export type FieldType =
   | 'integer'
   | 'string'
   | 'text'
@@ -73,11 +73,11 @@ export interface RelationshipRule {
   trigger: RuleTrigger;
   scope: RuleScope;
   enabled: boolean;
-  
+
   // The rule can be defined as structured conditions OR raw DSL
   conditions?: RuleCondition[];
   dslCode?: string; // Raw pseudo-code/DSL for advanced users
-  
+
   // Actions to take
   action: RuleAction;
 }
@@ -108,26 +108,26 @@ export interface RelationshipConstraint {
   name: string;
   type: 'unique' | 'check' | 'max_relations' | 'temporal' | 'custom';
   enabled: boolean;
-  
+
   // For unique constraints
   uniqueFields?: string[]; // Combination of attribute/entity field names
-  
+
   // For check constraints
   checkExpression?: string; // SQL-like expression
-  
+
   // For max_relations
   maxRelationsConfig?: {
     entityId: string;
     limit: number;
   };
-  
+
   // For temporal constraints
   temporalConfig?: {
     startField: string;
     endField: string;
     allowOverlap: boolean;
   };
-  
+
   // For custom
   customDsl?: string;
 }
@@ -138,27 +138,27 @@ export interface Relationship {
   name: string;
   type: RelationType;
   position: { x: number; y: number };
-  
+
   // Connections to entities (2 or more for ternary+)
   connections: RelationshipConnection[];
-  
+
   // Relationship's own attributes
   attributes: RelationshipAttribute[];
-  
+
   // Foreign key behavior
   onDelete: OnDeleteAction;
   onUpdate: OnUpdateAction;
-  
+
   // Logic rules (business logic)
   rules: RelationshipRule[];
-  
+
   // Constraints
   constraints: RelationshipConstraint[];
-  
+
   // Visual properties
   isIdentifying: boolean; // Identifying vs non-identifying relationship
   isRecursive: boolean; // Self-referencing relationship
-  
+
   // Description for documentation
   description?: string;
 }
@@ -237,7 +237,7 @@ export const createField = (name: string = 'new_field'): Field => ({
 
 // Create a new relationship
 export const createRelationship = (
-  name: string, 
+  name: string,
   position: { x: number; y: number },
   type: RelationType = 'one-to-many'
 ): Relationship => ({
@@ -483,7 +483,7 @@ export const validateSchema = (schema: ERSchema): ValidationError[] => {
 export const deriveRelationType = (conn1: RelationshipConnection, conn2: RelationshipConnection): RelationType => {
   const c1 = conn1.cardinality;
   const c2 = conn2.cardinality;
-  
+
   if (c1 === '1' && c2 === '1') return 'one-to-one';
   if ((c1 === '1' && (c2 === 'N' || c2 === 'M')) || ((c1 === 'N' || c1 === 'M') && c2 === '1')) return 'one-to-many';
   return 'many-to-many';
