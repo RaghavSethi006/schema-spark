@@ -156,7 +156,7 @@ export const generateProjectFiles = (
   const dbAdapter = getDatabaseAdapter(config.database);
   const frameworkAdapter = getFrameworkAdapter(config.framework);
   
-  return frameworkAdapter.generateProject(ir as any, dbAdapter, config);
+  return frameworkAdapter.generateProject(schema, dbAdapter, config);
 };
 
 // Export as ZIP
