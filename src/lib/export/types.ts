@@ -75,6 +75,9 @@ export interface ExportConfig {
   namingConvention: 'snake_case' | 'camelCase' | 'PascalCase';
   tablePluralizer: boolean; includeAuthBoilerplate: boolean; includeCorsSetup: boolean; includeSwaggerDocs: boolean;
   customTemplates?: Record<string, string>;
+  electronConfig?: { contextIsolation: boolean; generateIPC: boolean; generatePreload: boolean; };
+  noSQLConfig?: { embeddingStrategy: 'embed' | 'reference' | 'hybrid'; denormalize: boolean; };
+  orm?: string;
 }
 
 export interface ExportPreset {

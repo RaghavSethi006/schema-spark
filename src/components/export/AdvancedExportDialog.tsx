@@ -12,6 +12,8 @@ import {
   Layers,
   Database,
   Code,
+  Monitor,
+  Server,
 } from 'lucide-react';
 import {
   Dialog,
@@ -31,10 +33,12 @@ import { exportSchema, importSchema } from '@/lib/export';
 import { ExportConfig, GeneratedFile } from '@/lib/export/types';
 import { defaultExportConfig, generateProjectFiles, exportProjectAsZip } from '@/lib/export/pipeline';
 import { getFrameworkAdapter } from '@/lib/export/frameworks';
+import { getSupportedPlatforms as getCompatiblePlatforms, getSupportedDatabases as getCompatibleDatabases } from '@/lib/export/types/config';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { FrameworkSelector } from './FrameworkSelector';
 import { DatabaseSelector } from './DatabaseSelector';
+import { PlatformSelector } from './PlatformSelector';
 import { ExportPresets } from './ExportPresets';
 import { ExportOptionsPanel } from './ExportOptionsPanel';
 import { FilePreview } from './FilePreview';
@@ -59,7 +63,7 @@ export const AdvancedExportDialog = () => {
     }
   }, [schema.name]);
 
-  // Get supported databases for selected framework
+  // Get compatible platforms & databases for selected framework
   const frameworkAdapter = useMemo(() => {
     try {
       return getFrameworkAdapter(config.framework);
@@ -67,6 +71,17 @@ export const AdvancedExportDialog = () => {
       return null;
     }
   }, [config.framework]);
+
+  const compatiblePlatforms = useMemo(() => getCompatiblePlatforms(config.framework), [config.framework]);
+  const compatibleDatabases = useMemo(() => getCompatibleDatabases(config.framework), [config.framework]);
+
+  // Determine if current DB is NoSQL
+  const isNoSQL = useMemo(() => {
+    const noSQLTypes = ['mongodb', 'couchdb', 'redis', 'dynamodb', 'neo4j', 'arangodb', 'cassandra', 'scylladb'];
+    return noSQLTypes.includes(config.database);
+  }, [config.database]);
+
+  const isElectron = config.platform === 'electron';
 
   // Generate preview files
   const previewFiles = useMemo<GeneratedFile[]>(() => {
@@ -234,15 +249,28 @@ export const AdvancedExportDialog = () => {
                 </div>
               </div>
 
-              {/* Framework & Database Selection */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Platform, Framework & Database Selection */}
+              <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium flex items-center gap-2">
-                      <Code className="w-4 h-4 text-muted-foreground" />
-                      Framework
-                    </label>
-                  </div>
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Server className="w-4 h-4 text-muted-foreground" />
+                    Platform
+                  </label>
+                  <PlatformSelector
+                    value={config.platform || 'nodejs'}
+                    onChange={(platform) => handleConfigChange({ 
+                      platform,
+                      ...(platform === 'electron' ? { electronConfig: { contextIsolation: true, generateIPC: true, generatePreload: true } } : {}),
+                    })}
+                    supportedPlatforms={compatiblePlatforms}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Code className="w-4 h-4 text-muted-foreground" />
+                    Framework
+                  </label>
                   <FrameworkSelector
                     value={config.framework}
                     onChange={(framework) => handleConfigChange({ framework })}
@@ -255,19 +283,111 @@ export const AdvancedExportDialog = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium flex items-center gap-2">
-                      <Database className="w-4 h-4 text-muted-foreground" />
-                      Database
-                    </label>
-                  </div>
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Database className="w-4 h-4 text-muted-foreground" />
+                    Database
+                  </label>
                   <DatabaseSelector
                     value={config.database}
-                    onChange={(database) => handleConfigChange({ database })}
-                    supportedDatabases={frameworkAdapter?.supportedDatabases}
+                    onChange={(database) => {
+                      const noSQLTypes = ['mongodb', 'couchdb', 'redis', 'dynamodb', 'neo4j', 'arangodb', 'cassandra', 'scylladb'];
+                      const isNS = noSQLTypes.includes(database);
+                      handleConfigChange({ 
+                        database,
+                        databaseCategory: isNS ? 'document' : 'relational',
+                        ...(isNS ? { noSQLConfig: config.noSQLConfig || { embeddingStrategy: 'hybrid', denormalize: false } } : {}),
+                      });
+                    }}
+                    supportedDatabases={compatibleDatabases}
                   />
                 </div>
               </div>
+
+              {/* Electron Options */}
+              {isElectron && (
+                <div className="p-3 rounded-lg border border-primary/20 bg-primary/5 space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Monitor className="w-4 h-4 text-primary" />
+                    Electron Desktop Options
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 text-sm">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={config.electronConfig?.contextIsolation ?? true}
+                        onChange={(e) => handleConfigChange({
+                          electronConfig: { ...config.electronConfig!, contextIsolation: e.target.checked }
+                        })}
+                        className="rounded"
+                      />
+                      Context Isolation
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={config.electronConfig?.generateIPC ?? true}
+                        onChange={(e) => handleConfigChange({
+                          electronConfig: { ...config.electronConfig!, generateIPC: e.target.checked }
+                        })}
+                        className="rounded"
+                      />
+                      Generate IPC
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={config.electronConfig?.generatePreload ?? true}
+                        onChange={(e) => handleConfigChange({
+                          electronConfig: { ...config.electronConfig!, generatePreload: e.target.checked }
+                        })}
+                        className="rounded"
+                      />
+                      Preload Script
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* NoSQL Options */}
+              {isNoSQL && (
+                <div className="p-3 rounded-lg border border-primary/20 bg-primary/5 space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Database className="w-4 h-4 text-primary" />
+                    NoSQL Options
+                  </div>
+                  <div className="flex items-center gap-4 text-sm">
+                    <label className="text-muted-foreground">Embedding Strategy:</label>
+                    <select
+                      value={config.noSQLConfig?.embeddingStrategy || 'hybrid'}
+                      onChange={(e) => handleConfigChange({
+                        noSQLConfig: { 
+                          ...(config.noSQLConfig || { denormalize: false }),
+                          embeddingStrategy: e.target.value as 'embed' | 'reference' | 'hybrid',
+                        }
+                      })}
+                      className="rounded border bg-background px-2 py-1 text-sm"
+                    >
+                      <option value="embed">Embed</option>
+                      <option value="reference">Reference</option>
+                      <option value="hybrid">Hybrid</option>
+                    </select>
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={config.noSQLConfig?.denormalize ?? false}
+                        onChange={(e) => handleConfigChange({
+                          noSQLConfig: { 
+                            ...(config.noSQLConfig || { embeddingStrategy: 'hybrid' }),
+                            denormalize: e.target.checked,
+                          }
+                        })}
+                        className="rounded"
+                      />
+                      Denormalize
+                    </label>
+                  </div>
+                </div>
+              )}
 
               {/* Quick Presets */}
               <div className="flex items-center gap-2">
