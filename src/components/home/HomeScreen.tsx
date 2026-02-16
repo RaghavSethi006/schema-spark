@@ -18,6 +18,7 @@ import {
   LayoutTemplate,
   FolderOpen,
   X,
+  PenTool,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +41,7 @@ const TEMPLATE_ICONS: Record<string, React.ReactNode> = {
   'lms': <GraduationCap className="w-6 h-6" />,
   'ecommerce': <ShoppingCart className="w-6 h-6" />,
   'crm': <Briefcase className="w-6 h-6" />,
+  'blog': <PenTool className="w-6 h-6" />,
 };
 
 export const HomeScreen = () => {
