@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ERSchema, createEmptySchema } from './schema';
 import { v4 as uuid } from 'uuid';
+import { createAuthSchema, createLMSSchema, createEcommerceSchema, createCRMSchema, createBlogSchema } from './templates';
 
 // Project file format (.schemaspark)
 export interface ProjectFile {
@@ -60,34 +61,42 @@ export const OFFICIAL_TEMPLATES: ProjectTemplate[] = [
   {
     id: 'auth-system',
     name: 'Authentication System',
-    description: 'User, Session, Role, and Permission entities',
+    description: '6 entities · 4 relationships · RBAC, sessions, audit logging, password resets',
     category: 'official',
-    tags: ['auth', 'users', 'roles'],
-    projectData: createAuthTemplate(),
+    tags: ['auth', 'rbac', 'sessions', 'security'],
+    projectData: createTemplateProject('Authentication System', createAuthSchema(), ['auth', 'rbac', 'sessions']),
   },
   {
     id: 'lms',
     name: 'Learning Management System',
-    description: 'Course, Student, Enrollment, and Grade entities',
+    description: '7 entities · 6 relationships · Enrollments, grading, prerequisites, advising',
     category: 'official',
-    tags: ['education', 'lms', 'courses'],
-    projectData: createLMSTemplate(),
+    tags: ['education', 'lms', 'courses', 'grading'],
+    projectData: createTemplateProject('Learning Management System', createLMSSchema(), ['education', 'lms', 'courses']),
   },
   {
     id: 'ecommerce',
     name: 'E-Commerce Store',
-    description: 'Product, Order, Customer, and Payment entities',
+    description: '8 entities · 7 relationships · Orders, inventory, reviews, coupons, categories',
     category: 'official',
-    tags: ['store', 'products', 'orders'],
-    projectData: createEcommerceTemplate(),
+    tags: ['store', 'products', 'orders', 'inventory'],
+    projectData: createTemplateProject('E-Commerce Store', createEcommerceSchema(), ['store', 'products', 'orders']),
   },
   {
     id: 'crm',
     name: 'CRM System',
-    description: 'Contact, Company, Deal, and Activity entities',
+    description: '7 entities · 6 relationships · Deals, pipelines, activities, task automation',
     category: 'official',
-    tags: ['crm', 'sales', 'contacts'],
-    projectData: createCRMTemplate(),
+    tags: ['crm', 'sales', 'deals', 'pipeline'],
+    projectData: createTemplateProject('CRM System', createCRMSchema(), ['crm', 'sales', 'deals']),
+  },
+  {
+    id: 'blog',
+    name: 'Blog Platform',
+    description: '6 entities · 5 relationships · Posts, comments, tags, categories, media uploads',
+    category: 'official',
+    tags: ['blog', 'cms', 'posts', 'comments'],
+    projectData: createTemplateProject('Blog Platform', createBlogSchema(), ['blog', 'cms', 'posts']),
   },
 ];
 
@@ -114,167 +123,10 @@ function createProjectFile(name: string, schema?: ERSchema): ProjectFile {
   };
 }
 
-function createAuthTemplate(): ProjectFile {
-  const project = createProjectFile('Authentication System');
-  project.schema.name = 'Authentication System';
-  project.schema.entities = [
-    {
-      id: uuid(),
-      name: 'User',
-      fields: [
-        { id: uuid(), name: 'id', type: 'uuid', isPrimaryKey: true, isNullable: false, isUnique: true, isForeignKey: false },
-        { id: uuid(), name: 'email', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: true, isForeignKey: false },
-        { id: uuid(), name: 'password_hash', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-        { id: uuid(), name: 'created_at', type: 'datetime', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-      ],
-      position: { x: 100, y: 100 },
-    },
-    {
-      id: uuid(),
-      name: 'Role',
-      fields: [
-        { id: uuid(), name: 'id', type: 'uuid', isPrimaryKey: true, isNullable: false, isUnique: true, isForeignKey: false },
-        { id: uuid(), name: 'name', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: true, isForeignKey: false },
-      ],
-      position: { x: 400, y: 100 },
-    },
-    {
-      id: uuid(),
-      name: 'Permission',
-      fields: [
-        { id: uuid(), name: 'id', type: 'uuid', isPrimaryKey: true, isNullable: false, isUnique: true, isForeignKey: false },
-        { id: uuid(), name: 'name', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: true, isForeignKey: false },
-        { id: uuid(), name: 'resource', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-      ],
-      position: { x: 700, y: 100 },
-    },
-  ];
+function createTemplateProject(name: string, schema: ERSchema, tags: string[]): ProjectFile {
+  const project = createProjectFile(name, schema);
   project.metadata.isTemplate = true;
-  project.metadata.tags = ['auth', 'users', 'roles'];
-  return project;
-}
-
-function createLMSTemplate(): ProjectFile {
-  const project = createProjectFile('Learning Management System');
-  project.schema.name = 'Learning Management System';
-  project.schema.entities = [
-    {
-      id: uuid(),
-      name: 'Student',
-      fields: [
-        { id: uuid(), name: 'id', type: 'uuid', isPrimaryKey: true, isNullable: false, isUnique: true, isForeignKey: false },
-        { id: uuid(), name: 'name', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-        { id: uuid(), name: 'email', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: true, isForeignKey: false },
-      ],
-      position: { x: 100, y: 100 },
-    },
-    {
-      id: uuid(),
-      name: 'Course',
-      fields: [
-        { id: uuid(), name: 'id', type: 'uuid', isPrimaryKey: true, isNullable: false, isUnique: true, isForeignKey: false },
-        { id: uuid(), name: 'title', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-        { id: uuid(), name: 'credits', type: 'integer', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-      ],
-      position: { x: 400, y: 100 },
-    },
-    {
-      id: uuid(),
-      name: 'Instructor',
-      fields: [
-        { id: uuid(), name: 'id', type: 'uuid', isPrimaryKey: true, isNullable: false, isUnique: true, isForeignKey: false },
-        { id: uuid(), name: 'name', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-        { id: uuid(), name: 'department', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-      ],
-      position: { x: 700, y: 100 },
-    },
-  ];
-  project.metadata.isTemplate = true;
-  project.metadata.tags = ['education', 'lms', 'courses'];
-  return project;
-}
-
-function createEcommerceTemplate(): ProjectFile {
-  const project = createProjectFile('E-Commerce Store');
-  project.schema.name = 'E-Commerce Store';
-  project.schema.entities = [
-    {
-      id: uuid(),
-      name: 'Product',
-      fields: [
-        { id: uuid(), name: 'id', type: 'uuid', isPrimaryKey: true, isNullable: false, isUnique: true, isForeignKey: false },
-        { id: uuid(), name: 'name', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-        { id: uuid(), name: 'price', type: 'float', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-        { id: uuid(), name: 'stock', type: 'integer', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-      ],
-      position: { x: 100, y: 100 },
-    },
-    {
-      id: uuid(),
-      name: 'Customer',
-      fields: [
-        { id: uuid(), name: 'id', type: 'uuid', isPrimaryKey: true, isNullable: false, isUnique: true, isForeignKey: false },
-        { id: uuid(), name: 'email', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: true, isForeignKey: false },
-        { id: uuid(), name: 'name', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-      ],
-      position: { x: 400, y: 100 },
-    },
-    {
-      id: uuid(),
-      name: 'Order',
-      fields: [
-        { id: uuid(), name: 'id', type: 'uuid', isPrimaryKey: true, isNullable: false, isUnique: true, isForeignKey: false },
-        { id: uuid(), name: 'total', type: 'float', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-        { id: uuid(), name: 'status', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-        { id: uuid(), name: 'created_at', type: 'datetime', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-      ],
-      position: { x: 700, y: 100 },
-    },
-  ];
-  project.metadata.isTemplate = true;
-  project.metadata.tags = ['store', 'products', 'orders'];
-  return project;
-}
-
-function createCRMTemplate(): ProjectFile {
-  const project = createProjectFile('CRM System');
-  project.schema.name = 'CRM System';
-  project.schema.entities = [
-    {
-      id: uuid(),
-      name: 'Contact',
-      fields: [
-        { id: uuid(), name: 'id', type: 'uuid', isPrimaryKey: true, isNullable: false, isUnique: true, isForeignKey: false },
-        { id: uuid(), name: 'name', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-        { id: uuid(), name: 'email', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: true, isForeignKey: false },
-        { id: uuid(), name: 'phone', type: 'string', isPrimaryKey: false, isNullable: true, isUnique: false, isForeignKey: false },
-      ],
-      position: { x: 100, y: 100 },
-    },
-    {
-      id: uuid(),
-      name: 'Company',
-      fields: [
-        { id: uuid(), name: 'id', type: 'uuid', isPrimaryKey: true, isNullable: false, isUnique: true, isForeignKey: false },
-        { id: uuid(), name: 'name', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-        { id: uuid(), name: 'industry', type: 'string', isPrimaryKey: false, isNullable: true, isUnique: false, isForeignKey: false },
-      ],
-      position: { x: 400, y: 100 },
-    },
-    {
-      id: uuid(),
-      name: 'Deal',
-      fields: [
-        { id: uuid(), name: 'id', type: 'uuid', isPrimaryKey: true, isNullable: false, isUnique: true, isForeignKey: false },
-        { id: uuid(), name: 'title', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-        { id: uuid(), name: 'value', type: 'float', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-        { id: uuid(), name: 'stage', type: 'string', isPrimaryKey: false, isNullable: false, isUnique: false, isForeignKey: false },
-      ],
-      position: { x: 700, y: 100 },
-    },
-  ];
-  project.metadata.isTemplate = true;
-  project.metadata.tags = ['crm', 'sales', 'contacts'];
+  project.metadata.tags = tags;
   return project;
 }
 
