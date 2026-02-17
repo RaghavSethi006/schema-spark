@@ -6,7 +6,6 @@ import {
   Unlink, 
   Eye, 
   Settings,
-  ArrowRight,
   CircleDot,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -116,6 +115,20 @@ const AttributeBadge = ({ name, type }: { name: string; type: string }) => (
   </div>
 );
 
+const POSITIONS = ['left', 'right', 'top', 'bottom'] as const;
+const POSITION_MAP: Record<string, Position> = {
+  left: Position.Left,
+  right: Position.Right,
+  top: Position.Top,
+  bottom: Position.Bottom,
+};
+const HANDLE_TYPE_MAP: Record<string, 'source' | 'target'> = {
+  left: 'target',
+  right: 'source',
+  top: 'target',
+  bottom: 'source',
+};
+
 export const RelationshipNode = memo(({ data, selected }: NodeProps) => {
   const { relationship } = data as unknown as RelationshipNodeData;
   const { selectRelationship, schema } = useSchemaStore();
@@ -127,12 +140,16 @@ export const RelationshipNode = memo(({ data, selected }: NodeProps) => {
 
   // Determine handle positions based on connections
   const connectionPositions = useMemo(() => {
-    const positions: ('left' | 'right' | 'top' | 'bottom')[] = ['left', 'right', 'top', 'bottom'];
     return relationship.connections.map((conn, index) => ({
       connection: conn,
-      position: positions[index % positions.length],
+      position: POSITIONS[index % POSITIONS.length],
     }));
   }, [relationship.connections]);
+
+  // Track which positions are occupied by connections
+  const occupiedPositions = useMemo(() => {
+    return new Set(connectionPositions.map(cp => cp.position));
+  }, [connectionPositions]);
 
   const hasConnections = relationship.connections.length > 0;
   const hasAttributes = relationship.attributes.length > 0;
@@ -157,16 +174,12 @@ export const RelationshipNode = memo(({ data, selected }: NodeProps) => {
         className="relative group"
         onClick={handleClick}
       >
-        {/* Connection handles */}
+        {/* Connection handles — one per existing connection */}
         {connectionPositions.map(({ connection, position }) => (
           <Handle
             key={connection.id}
-            type={position === 'left' || position === 'top' ? 'target' : 'source'}
-            position={
-              position === 'left' ? Position.Left :
-              position === 'right' ? Position.Right :
-              position === 'top' ? Position.Top : Position.Bottom
-            }
+            type={HANDLE_TYPE_MAP[position]}
+            position={POSITION_MAP[position]}
             id={`${connection.id}-${position}`}
             className={cn(
               "!w-3 !h-3 !border-2",
@@ -176,23 +189,17 @@ export const RelationshipNode = memo(({ data, selected }: NodeProps) => {
           />
         ))}
 
-        {/* Default handles when no connections */}
-        {!hasConnections && (
-          <>
-            <Handle
-              type="target"
-              position={Position.Left}
-              id="default-left"
-              className="!w-3 !h-3 !border-2 !bg-card !border-muted-foreground hover:!border-primary"
-            />
-            <Handle
-              type="source"
-              position={Position.Right}
-              id="default-right"
-              className="!w-3 !h-3 !border-2 !bg-card !border-muted-foreground hover:!border-primary"
-            />
-          </>
-        )}
+        {/* Fallback handles for unoccupied positions — always present so edges can connect */}
+        {POSITIONS.filter(p => !occupiedPositions.has(p)).map(position => (
+          <Handle
+            key={`fallback-${position}`}
+            type={HANDLE_TYPE_MAP[position]}
+            position={POSITION_MAP[position]}
+            id={`default-${position}`}
+            className="!w-3 !h-3 !border-2 !bg-card !border-muted-foreground hover:!border-primary"
+            style={{ opacity: hasConnections ? 0 : 1 }}
+          />
+        ))}
 
         {/* Connection indicators */}
         {connectionPositions.map(({ connection, position }) => (

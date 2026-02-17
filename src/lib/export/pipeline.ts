@@ -1,6 +1,7 @@
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { ERSchema, Entity, Relationship } from '../schema';
+import { materializeRelationshipsForExport } from './materialize';
 import { 
   ExportConfig, 
   ExportPreset, 
@@ -158,25 +159,25 @@ export const transformToIR = (schema: ERSchema, config: ExportConfig): Canonical
     constraints: [],
   }));
 
-  const relationships: IRRelationship[] = (schema.relationships || []).map(rel => ({
-    name: rel.name,
+  // Legacy relations
+  const legacyRelationships: IRRelationship[] = (schema.relations || []).map(rel => ({
+    name: `legacy_${toSnakeCase(rel.sourceEntityId)}_${toSnakeCase(rel.targetEntityId)}`,
     type: rel.type,
-    sourceTable: rel.connections[0]?.entityId || '',
-    targetTable: rel.connections[1]?.entityId || '',
-    sourceColumns: rel.connections[0] ? [rel.connections[0].fieldId] : [],
-    targetColumns: rel.connections[1] ? [rel.connections[1].fieldId] : [],
-    rules: rel.rules.map(r => ({
-      name: r.name,
-      trigger: r.trigger as any,
-      action: r.action.type,
-    })),
+    sourceTable: rel.sourceEntityId,
+    targetTable: rel.targetEntityId,
+    sourceColumns: [rel.sourceFieldId],
+    targetColumns: [rel.targetFieldId],
+    rules: [],
   }));
+
+  // Materialize first-class relationship diamonds
+  const materialized = materializeRelationshipsForExport(schema);
 
   return {
     projectName: config.projectName,
     version: schema.version,
-    tables,
-    relationships,
+    tables: [...tables, ...materialized.tables],
+    relationships: [...legacyRelationships, ...materialized.relationships],
     enums: [],
   };
 };
