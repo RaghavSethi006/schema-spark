@@ -9,10 +9,8 @@ import {
   addEdge,
   Connection,
   Node,
-  Edge,
   NodeTypes,
   Panel,
-  MarkerType,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
@@ -20,6 +18,7 @@ import { EntityNode } from './EntityNode';
 import { RelationshipNode } from './RelationshipNode';
 import { createDemoSchema } from '@/lib/demo';
 import { useSchemaStore } from '@/lib/store';
+import { deriveRelationshipEdges, deriveLegacyEdges } from '@/lib/diagramEdges';
 import { Plus, Diamond, FileJson, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -35,6 +34,7 @@ export const DiagramCanvas = () => {
     addEntity, 
     addRelation,
     addRelationship,
+    addRelationshipConnection,
     setEntityPosition,
     setRelationshipPosition,
     selectEntity,
@@ -60,35 +60,12 @@ export const DiagramCanvas = () => {
     return [...entityNodes, ...relationshipNodes];
   }, [schema.entities, schema.relationships]);
 
-  // Convert schema relations to React Flow edges
-  const initialEdges: Edge[] = useMemo(() => {
-    return schema.relations.map((relation) => ({
-      id: relation.id,
-      source: relation.sourceEntityId,
-      target: relation.targetEntityId,
-      sourceHandle: `${relation.sourceFieldId}-source`,
-      targetHandle: `${relation.targetFieldId}-target`,
-      type: 'smoothstep',
-      animated: true,
-      style: { strokeWidth: 2 },
-      markerEnd: {
-        type: MarkerType.ArrowClosed,
-        width: 20,
-        height: 20,
-      },
-      label: relation.type === 'one-to-many' ? '1:N' : '1:1',
-      labelStyle: { 
-        fill: 'hsl(var(--foreground))', 
-        fontWeight: 500,
-        fontSize: 10,
-      },
-      labelBgStyle: { 
-        fill: 'hsl(var(--card))', 
-        stroke: 'hsl(var(--border))',
-        strokeWidth: 1,
-      },
-    }));
-  }, [schema.relations]);
+  // Derive edges from BOTH legacy relations AND relationship diamonds
+  const initialEdges = useMemo(() => {
+    const legacyEdges = deriveLegacyEdges(schema.relations);
+    const relationshipEdges = deriveRelationshipEdges(schema);
+    return [...legacyEdges, ...relationshipEdges];
+  }, [schema.relations, schema.relationships, schema.entities]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -106,22 +83,40 @@ export const DiagramCanvas = () => {
     (params: Connection) => {
       if (!params.source || !params.target || !params.sourceHandle || !params.targetHandle) return;
       
-      // Extract field IDs from handles
-      const sourceFieldId = params.sourceHandle.replace('-source', '');
-      const targetFieldId = params.targetHandle.replace('-target', '');
-      
-      // Add relation to schema
-      addRelation({
-        type: 'one-to-many',
-        sourceEntityId: params.source,
-        sourceFieldId,
-        targetEntityId: params.target,
-        targetFieldId,
-      });
+      const relationshipIds = new Set((schema.relationships || []).map(r => r.id));
+      const sourceIsRelationship = relationshipIds.has(params.source);
+      const targetIsRelationship = relationshipIds.has(params.target);
+
+      if (sourceIsRelationship || targetIsRelationship) {
+        // Diamond connection: entity ↔ relationship
+        const relationshipId = sourceIsRelationship ? params.source : params.target;
+        const entityId = sourceIsRelationship ? params.target : params.source;
+        
+        // Find the entity's PK field as default
+        const entity = schema.entities.find(e => e.id === entityId);
+        const pkField = entity?.fields.find(f => f.isPrimaryKey);
+        const fieldId = pkField?.id || entity?.fields[0]?.id || '';
+        
+        if (fieldId) {
+          addRelationshipConnection(relationshipId, entityId, fieldId);
+        }
+      } else {
+        // Legacy entity-to-entity connection
+        const sourceFieldId = params.sourceHandle.replace('-source', '');
+        const targetFieldId = params.targetHandle.replace('-target', '');
+        
+        addRelation({
+          type: 'one-to-many',
+          sourceEntityId: params.source,
+          sourceFieldId,
+          targetEntityId: params.target,
+          targetFieldId,
+        });
+      }
       
       setEdges((eds) => addEdge(params, eds));
     },
-    [addRelation, setEdges]
+    [addRelation, addRelationshipConnection, setEdges, schema.relationships, schema.entities]
   );
 
   const onNodeDragStop = useCallback(
