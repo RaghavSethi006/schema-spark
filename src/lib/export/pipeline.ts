@@ -139,6 +139,22 @@ export const validateSchema = (schema: ERSchema): ValidationResult => {
   return { valid: errors.length === 0, errors, warnings };
 };
 
+/** Resolve an entity ID to the IR table name (respects pluralizer) */
+const entityIdToTableName = (schema: ERSchema, entityId: string, config: ExportConfig): string => {
+  const entity = schema.entities.find(e => e.id === entityId);
+  if (!entity) return entityId;
+  const base = toSnakeCase(entity.name);
+  return config.tablePluralizer ? base + 's' : base;
+};
+
+/** Resolve a field ID to the IR column name */
+const fieldIdToColumnName = (schema: ERSchema, entityId: string, fieldId: string): string => {
+  const entity = schema.entities.find(e => e.id === entityId);
+  if (!entity) return fieldId;
+  const field = entity.fields.find(f => f.id === fieldId);
+  return field ? toSnakeCase(field.name) : fieldId;
+};
+
 // Transform schema to canonical IR
 export const transformToIR = (schema: ERSchema, config: ExportConfig): CanonicalIR => {
   const tables: IRTable[] = schema.entities.map(entity => ({
@@ -159,25 +175,34 @@ export const transformToIR = (schema: ERSchema, config: ExportConfig): Canonical
     constraints: [],
   }));
 
-  // Legacy relations
+  // Legacy relations — resolve IDs to proper IR table/column names
   const legacyRelationships: IRRelationship[] = (schema.relations || []).map(rel => ({
-    name: `legacy_${toSnakeCase(rel.sourceEntityId)}_${toSnakeCase(rel.targetEntityId)}`,
+    name: `legacy_${entityIdToTableName(schema, rel.sourceEntityId, config)}_${entityIdToTableName(schema, rel.targetEntityId, config)}`,
     type: rel.type,
-    sourceTable: rel.sourceEntityId,
-    targetTable: rel.targetEntityId,
-    sourceColumns: [rel.sourceFieldId],
-    targetColumns: [rel.targetFieldId],
+    sourceTable: entityIdToTableName(schema, rel.sourceEntityId, config),
+    targetTable: entityIdToTableName(schema, rel.targetEntityId, config),
+    sourceColumns: [fieldIdToColumnName(schema, rel.sourceEntityId, rel.sourceFieldId)],
+    targetColumns: [fieldIdToColumnName(schema, rel.targetEntityId, rel.targetFieldId)],
     rules: [],
   }));
 
-  // Materialize first-class relationship diamonds
-  const materialized = materializeRelationshipsForExport(schema);
+  // Materialize first-class relationship diamonds (mutates `tables` to inject FK columns for 1:1/1:N)
+  const materialized = materializeRelationshipsForExport(schema, config, tables);
+
+  // Deduplicate: if a legacy relation matches a materialized one (same source+target tables), skip the legacy
+  const materializedKeys = new Set(
+    materialized.relationships.map(r => `${r.sourceTable}:${r.targetTable}`)
+  );
+  const dedupedLegacy = legacyRelationships.filter(
+    r => !materializedKeys.has(`${r.sourceTable}:${r.targetTable}`) &&
+         !materializedKeys.has(`${r.targetTable}:${r.sourceTable}`)
+  );
 
   return {
     projectName: config.projectName,
     version: schema.version,
     tables: [...tables, ...materialized.tables],
-    relationships: [...legacyRelationships, ...materialized.relationships],
+    relationships: [...dedupedLegacy, ...materialized.relationships],
     enums: [],
   };
 };
